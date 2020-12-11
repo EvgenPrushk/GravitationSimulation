@@ -8,6 +8,10 @@ class Canvas {
         document.addEventListener('resize', () => this.resize());
     }
 
+    clear () {
+        this.view.width |= this.view.width;
+    }
+
     draw () {
         for (const item of this.container) {
             item.draw(this);
@@ -29,6 +33,16 @@ class Canvas {
         }
     }
 
+    drawLine (param) {
+        this.context.beginPath();
+        this.context.moveTo(param.x1, param.y1);
+        this.context.lineTo(param.x2, param.y2);
+        this.context.lineWidth = param.lineWidth;
+        if (param.strokeStyle) {
+            this.context.strokeStyle = param.strokeStyle;
+            this.context.stroke();
+        }
+    }
 
     resize (){
         this.view.width = window.innerWidth;
