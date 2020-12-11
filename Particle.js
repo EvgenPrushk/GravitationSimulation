@@ -18,12 +18,17 @@ class Particle {
         return Vector.get().add(...this.forces);
     }
 
+    // высчитываем радиус с помощью гетера
+    get r () {
+        return (this.mass / (Math.PI * P)) ** 0.5
+    }
+
     // canvas как экземпляр класса
     draw (canvas){
         canvas.drawCircle({
             x: this.position.x,
             y: this.position.y,
-            r: (this.mass / (Math.PI * P)) ** 0.5,
+            r: this.r,
             fillStyle: "black",
         });
 

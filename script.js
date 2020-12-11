@@ -1,12 +1,12 @@
-const G = 0.05;
+const G = 0.1;
 // плотность
 const P = 0.1;
 // условное растояние при котором они сталкиваются
-const COLLAPSE_LENGTH = 5;
+const COLLAPSE_LENGTH = 1;
 
 const canvas = new Canvas();
 
-const particles = [];
+let particles = [];
 
 for (let i = 0; i < 100; i++) {
     particles.push(new Particle({
@@ -67,25 +67,55 @@ function tick() {
         particle.position.add(particle.speed);
     }
 
-    const newParticle = [];
+    const newParticles = [];
+    const forDelete = [];
 
     for (let i = 0; i < particles.length - 1; i++) {
         const a = particles[i];
+        if (forDelete.includes(a)) {
+            continue;
+        }
 
         for (let j = i + 1; j < particles.length; j++) {
             const b = particles[j];
 
-            const diff = Vector.getDiff(a.position, b.position)
+            if (forDelete.includes(b)) {
+                continue;
+            }
 
-            if (diff.length < COLLAPSE_LENGTH) {
+            const diff = Vector.getDiff(a.position, b.position)
+            //столкновение двух частиц и создание новой частицы
+            if (diff.length < (a.r + b.r) / 2) {
                 const mass = a.mass + b.mass;
+
                 const newParticle = new Particle({
                     mass
                 });
-                newParticle.position.add(a.position, b.position).mult(0.5);
+                newParticle.position = new Vector(
+                    b.position.x + (diff.x * a.mass) / newParticle.mass,
+                    b.position.y + (diff.y * a.mass) / newParticle.mass,
+                )
+                
+                newParticle.speed = new Vector(
+                    (a.mass / newParticle.mass) * a.speed.x + (b.mass / newParticle.mass) * b.speed.x,
+                    (a.mass / newParticle.mass) * a.speed.y + (b.mass / newParticle.mass) * b.speed.y,
+                );
+                newParticles.push(newParticle);
+                forDelete.push(a, b);
             }
         }
     }
+    const updateParticles = [];
+    for (const particle of particles) {
+        if (!forDelete.includes(particle)) {
+            updateParticles.push(particle);
+        }
+    }
+
+    updateParticles.push(...newParticles);
+    particles = updateParticles;
+    canvas.container = particles;
+    console.log(particles.length);
 
     canvas.clear();
     canvas.draw();
