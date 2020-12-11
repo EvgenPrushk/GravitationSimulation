@@ -33,7 +33,7 @@ class Vector {
    mult(n) {
        this.x *= n;
        this.y *= n;
-
+    return this;
    }
 
    getNegative () {

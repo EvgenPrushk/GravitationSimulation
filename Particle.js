@@ -1,6 +1,6 @@
 class Particle {
     constructor(param = {}) {
-        this.position = new Vector(param.x, param.y);
+        this.position = new Vector(param.x ?? 0, param.y ?? 0);
         // скорости
         this.speed = new Vector(0, 0);
         this.acceleration = new Vector(0, 0);

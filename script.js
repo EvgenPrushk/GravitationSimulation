@@ -1,6 +1,8 @@
 const G = 0.05;
 // плотность
 const P = 0.1;
+// условное растояние при котором они сталкиваются
+const COLLAPSE_LENGTH = 5;
 
 const canvas = new Canvas();
 
@@ -12,7 +14,7 @@ for (let i = 0; i < 100; i++) {
         y: getRandomBetween(0, canvas.view.height),
         mass: getRandomBetween(1, 10),
     }))
-    
+
 }
 
 canvas.add(...particles);
@@ -35,37 +37,57 @@ function tick() {
         const ctrlParticle = particles[i];
 
         for (let j = i + 1; j < particles.length; j++) {
-           const currentParticle = particles[j];
+            const currentParticle = particles[j];
 
-          // возвращает вектор разницу между ctrlParticle.position и currentParticle.position
-           const force = Vector.getDiff(ctrlParticle.position, currentParticle.position);
-           
-           const forceNumber = (G * ctrlParticle.mass * currentParticle.mass) / Math.max(force.length ** 2, 0.00001);
-            
-           force.mult(forceNumber);
+            // возвращает вектор разницу между ctrlParticle.position и currentParticle.position
+            const force = Vector.getDiff(ctrlParticle.position, currentParticle.position);
 
-           ctrlParticle.forces.push(force.getNegative());
-           currentParticle.forces.push(force);
+            const forceNumber = (G * ctrlParticle.mass * currentParticle.mass) / Math.max(force.length ** 2, 0.00001);
+
+            force.mult(forceNumber);
+
+            ctrlParticle.forces.push(force.getNegative());
+            currentParticle.forces.push(force);
         }
 
-        
+
     }
 
     for (const particle of particles) {
         const force = particle.force;
-        
+
         particle.acceleration = new Vector(
             force.x / particle.mass,
             force.y / particle.mass,
         );
-       
+
     }
     for (const particle of particles) {
         particle.speed.add(particle.acceleration);
         particle.position.add(particle.speed);
     }
 
+    const newParticle = [];
+
+    for (let i = 0; i < particles.length - 1; i++) {
+        const a = particles[i];
+
+        for (let j = i + 1; j < particles.length; j++) {
+            const b = particles[j];
+
+            const diff = Vector.getDiff(a.position, b.position)
+
+            if (diff.length < COLLAPSE_LENGTH) {
+                const mass = a.mass + b.mass;
+                const newParticle = new Particle({
+                    mass
+                });
+                newParticle.position.add(a.position, b.position).mult(0.5);
+            }
+        }
+    }
+
     canvas.clear();
     canvas.draw();
-    
+
 }
